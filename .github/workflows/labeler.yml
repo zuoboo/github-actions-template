@@ -15,9 +15,11 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const { owner, repo, number, base } = context.issue;
-            const branchName = base.ref;
+            const { owner, repo, number } = context.issue;
+            const branchName = context.payload.pull_request.base.ref;
             let label;
+
+            console.log('Target branch:', branchName);
 
             if (branchName.includes('enhance')) {
               label = 'enhancement';
