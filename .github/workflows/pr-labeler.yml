@@ -8,10 +8,10 @@ jobs:
   label:
     runs-on: ubuntu-latest
     steps:
-      - name: Add enhancement label if branch name contains 'enhance'
+      - name: Add enhancement label if base branch name contains 'enhance'
         run: |
-          if [[ "${{ github.head_ref }}" == *enhance* ]]; then
-            echo "The branch name contains 'enhance'. Adding the 'enhancement' label."
+          if [[ "${{ github.event.pull_request.base.ref }}" == *enhance* ]]; then
+            echo "The base branch name contains 'enhance'. Adding the 'enhancement' label."
             curl -sSL \
               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -H "Accept: application/vnd.github.v3+json" \
@@ -19,5 +19,5 @@ jobs:
               -d '{"labels":["enhancement"]}' \
               "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/labels"
           else
-            echo "The branch name does not contain 'enhance'."
+            echo "The base branch name does not contain 'enhance'."
           fi
