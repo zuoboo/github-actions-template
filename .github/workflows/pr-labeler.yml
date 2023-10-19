@@ -1,17 +1,33 @@
-name: Add Label for master branch
+name: Add Enhancement Label
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    branches:
-      - main
-
 
 jobs:
-  post_processing:
+  add-label:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/labeler@v3
-        with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          configuration-path: '.github/labeler/main.yml'
+    - name: Add enhancement label if base branch contains 'enhance'
+      uses: actions/github-script@v5
+      with:
+        script: |
+          const { data: pr } = await github.rest.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number,
+          });
+          
+          if (pr.base.ref.includes('enhance')) {
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['enhancement']
+            });
+            
+            console.log('Added the enhancement label.');
+          } else {
+            console.log('The base branch does not contain "enhance".');
+          }
+        github-token: ${{ secrets.GITHUB_TOKEN }}
