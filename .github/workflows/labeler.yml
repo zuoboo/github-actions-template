@@ -1,14 +1,35 @@
-name: "Pull Request Labeler"
+name: Auto Labeler
+
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize]
 
 jobs:
-  triage:
+  labeler:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/labeler@v4
-      with:
-        repo-token: "${{ secrets.GITHUB_TOKEN }}"
-        sync-labels: true
-        configuration-path: .github/labeler.yml
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Add label based on target branch
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { owner, repo, number, base } = context.issue;
+            const branchName = base.ref;
+            let label;
+
+            if (branchName.includes('enhance')) {
+              label = 'enhancement';
+            } else if (branchName.includes('release')) {
+              label = 'renewal';
+            }
+
+            if (label) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: number,
+                labels: [label]
+              });
+            }
