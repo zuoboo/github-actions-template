@@ -10,7 +10,6 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-
       - name: Add label based on target branch
         uses: actions/github-script@v5
         with:
