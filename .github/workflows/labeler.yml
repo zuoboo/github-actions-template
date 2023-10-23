@@ -1,0 +1,38 @@
+name: Auto Labeler
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  labeler:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Add label based on target branch
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { owner, repo, number } = context.issue;
+            const branchName = context.payload.pull_request.base.ref;
+            let label;
+
+            console.log('Target branch:', branchName);
+
+            if (branchName.includes('enhance')) {
+              label = 'enhancement';
+            } else if (branchName.includes('release')) {
+              label = 'renewal';
+            }
+
+            if (label) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: number,
+                labels: [label]
+              });
+            }
+          token: ${{ secrets.GITHUB_TOKEN }}
